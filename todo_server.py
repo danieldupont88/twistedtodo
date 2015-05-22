@@ -23,6 +23,8 @@ def get_todos(user):
 def get_todo(user, id):
     return dbpool.get_todo_by_id(user, id)
 
+
+
 class ToDoAPI(APIResource):
 
     @GET('^/todos/$')
@@ -64,25 +66,38 @@ class ToDoAPI(APIResource):
 
         user = request.getHeader('user')
         payload = cgi.escape(request.content.read())
-
-        # Parse JSON into an object with attributes corresponding to keys.
         requestedTodo = json.loads(payload, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
         user = request.getHeader('user')
 
         dbpool.create_todo(user, requestedTodo.task).addCallback(onResult)
         return NOT_DONE_YET
 
-    @PUT('^/todos/(?P<id>[a-zA-Z0-9]+)')
+    @PUT('^/todos/(?P<id>[0-9]+)')
     def create_ob(self, request, id):
-        return "Trying to create object with id %s" % id
+        def onResult(data):
+            request.setHeader(b"content-type", b"application/json")
+            response = json.dumps(data, default=lambda o: o.__dict__)
+            request.write(response)
+            request.finish()
 
-    @DELETE('^/todos/(?P<id>[a-zA-Z0-9]+)')
+        user = request.getHeader('user')
+        payload = cgi.escape(request.content.read())
+        requestedTodo = json.loads(payload, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
+        request.setHeader(b"content-type", b"application/json")
+        user = request.getHeader('user')
+
+        d = dbpool.update_todo(user, id, requestedTodo.task, requestedTodo.status).addCallback(onResult)
+        return NOT_DONE_YET
+
+
+    @DELETE('^/todos/(?P<id>[0-9]+)')
     def del_ob(self, request, id):
+        user = request.getHeader('user')
         return "Deleting object %s" % id
 
     @ALL('^/')
     def default(self, request):
-        return "I match everything; clearly, you aren't asking for anything interesting."
+        return "Bad request."
 
 site = Site(ToDoAPI(), timeout=None)
 reactor.listenTCP(8090, site)

@@ -8,9 +8,24 @@ def _insertTodo(txn, task, user, status):
     txn.execute("INSERT INTO `todo` (task, user, status) VALUES (?, ?, ?)", (task, user, status))
     result = txn.fetchall()
     if result:
-        return result[0][0]
+        return result
     else:
         return txn.lastrowid
+
+def _updateTodo(txn, user, id, task, status):
+    txn.execute("UPDATE `todo` SET task = ?,  status = ? WHERE id=? AND user=? ", (task, status, id, user,))
+    txn.execute("SELECT * FROM `todo` WHERE id = ? and user =? ", (id, user,))
+    result = txn.fetchall()
+    if result:
+        return result
+    else:
+        return txn.lastrowid
+
+
+def build_todo(dbentries):
+    id, task, status, user = dbentries[0]
+    todo = ToDo(id, task, status, user)
+    return todo
 
 class DataPool:
     """
@@ -36,6 +51,7 @@ class DataPool:
     def build_todo(self, dbentries):
         id, task, status, user = dbentries[0]
         ToDo(id, task, status, user)
+        return ToDo
 
     def get_todo_list(self, user):
         query = 'SELECT * FROM `todo` WHERE user=?'
@@ -47,3 +63,6 @@ class DataPool:
 
     def create_todo(self, user, task):
         return self.__dbpool.runInteraction(_insertTodo, task, user, 0)
+
+    def update_todo(self, user, id, task, status):
+        return self.__dbpool.runInteraction(_updateTodo, user, id, task, status).addCallback(build_todo)
