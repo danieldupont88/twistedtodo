@@ -21,6 +21,9 @@ def _updateTodo(txn, user, id, task, status):
     else:
         return txn.lastrowid
 
+def _deleteTodo(txn, user, id):
+    txn.execute("DELETE FROM `todo` WHERE user= ? AND id= ?", (user, id))
+    return id
 
 def build_todo(dbentries):
     id, task, status, user = dbentries[0]
@@ -66,3 +69,6 @@ class DataPool:
 
     def update_todo(self, user, id, task, status):
         return self.__dbpool.runInteraction(_updateTodo, user, id, task, status).addCallback(build_todo)
+
+    def delete_todo(self, user, id):
+        return self.__dbpool.runInteraction(_deleteTodo, user, id,)

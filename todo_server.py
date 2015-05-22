@@ -24,7 +24,6 @@ def get_todo(user, id):
     return dbpool.get_todo_by_id(user, id)
 
 
-
 class ToDoAPI(APIResource):
 
     @GET('^/todos/$')
@@ -92,8 +91,14 @@ class ToDoAPI(APIResource):
 
     @DELETE('^/todos/(?P<id>[0-9]+)')
     def del_ob(self, request, id):
+        def onResult(data):
+            request.setHeader(b"content-type", b"application/json")
+            request.write(data)
+            request.finish()
+
         user = request.getHeader('user')
-        return "Deleting object %s" % id
+        d = dbpool.delete_todo(user, id).addCallback(onResult)
+        return NOT_DONE_YET
 
     @ALL('^/')
     def default(self, request):
