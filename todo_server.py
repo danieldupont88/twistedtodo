@@ -100,6 +100,20 @@ class ToDoAPI(APIResource):
         d = dbpool.delete_todo(user, id).addCallback(onResult)
         return NOT_DONE_YET
 
+    @POST('^/login/$')
+    def make_login(self, request, id):
+        def onResult(data):
+            request.setHeader(b"content-type", b"application/json")
+            request.write(data)
+            request.finish()
+
+        payload = cgi.escape(request.content.read())
+        requestedTodo = json.loads(payload, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
+        request.setHeader(b"content-type", b"application/json")
+        user = request.getHeader('user')
+        d = dbpool.make_login(user, password).addCallback(onResult)
+        return NOT_DONE_YET
+
     @ALL('^/')
     def default(self, request):
         return "Bad request."

@@ -2,6 +2,7 @@ __author__ = 'dn3'
 
 from twisted.enterprise.adbapi import ConnectionPool, Transaction
 from todo import ToDo
+from todo import User
 
 
 def _insertTodo(txn, task, user, status):
@@ -72,3 +73,12 @@ class DataPool:
 
     def delete_todo(self, user, id):
         return self.__dbpool.runInteraction(_deleteTodo, user, id,)
+
+    def return_login(self, dbentries):
+        id, username, password = dbentries[0]
+        User(id, username, password)
+        return User.render()
+
+    def make_login(self, username, password):
+        query = 'SELECT * FROM `user` WHERE username=? and password=?'
+        return self.__dbpool.runQuery(query, (username, password,)).addCallback(self. return_login)
