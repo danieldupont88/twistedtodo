@@ -76,9 +76,9 @@ class DataPool:
 
     def return_login(self, dbentries):
         id, username, password = dbentries[0]
-        User(id, username, password)
-        return User.render()
+        user = User(id, username, password)
+        return user
 
-    def make_login(self, username, password):
-        query = 'SELECT * FROM `user` WHERE username=? and password=?'
+    def select_make_login(self, username, password):
+        query = 'SELECT * FROM `users` WHERE username=? and password=?'
         return self.__dbpool.runQuery(query, (username, password,)).addCallback(self. return_login)

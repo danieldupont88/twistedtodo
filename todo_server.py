@@ -23,6 +23,8 @@ def get_todos(user):
 def get_todo(user, id):
     return dbpool.get_todo_by_id(user, id)
 
+def make_login(username, password):
+    return dbpool.select_make_login(username, password)
 
 class ToDoAPI(APIResource):
 
@@ -88,7 +90,6 @@ class ToDoAPI(APIResource):
         d = dbpool.update_todo(user, id, requestedTodo.task, requestedTodo.status).addCallback(onResult)
         return NOT_DONE_YET
 
-
     @DELETE('^/todos/(?P<id>[0-9]+)')
     def del_ob(self, request, id):
         def onResult(data):
@@ -101,17 +102,29 @@ class ToDoAPI(APIResource):
         return NOT_DONE_YET
 
     @POST('^/login/$')
-    def make_login(self, request, id):
+    def user_login(self, request):
         def onResult(data):
             request.setHeader(b"content-type", b"application/json")
-            request.write(data)
+            print data.id
+            request.setHeader(b"user", data.id)
+            request.finish()
+
+        def onError(err):
+            request.setResponseCode(401)
             request.finish()
 
         payload = cgi.escape(request.content.read())
-        requestedTodo = json.loads(payload, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
+        requestedLogin = json.loads(payload, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
         request.setHeader(b"content-type", b"application/json")
+
+        print requestedLogin.username
+        print requestedLogin.password
+
         user = request.getHeader('user')
-        d = dbpool.make_login(user, password).addCallback(onResult)
+        data = make_login(requestedLogin.username, requestedLogin.password)
+        data.addErrback(onError)
+        data.addCallback(onResult)
+
         return NOT_DONE_YET
 
     @ALL('^/')
