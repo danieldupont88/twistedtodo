@@ -28,16 +28,21 @@ def make_login(username, password):
 
 class ToDoAPI(APIResource):
 
-    @GET('^/todos/$')
+    @GET('^/todos$')
     def get_list(self, request):
-
+        print 'get todos'
         def onResult(data):
             request.setHeader(b"content-type", b"application/json")
+            request.setHeader('Access-Control-Allow-Origin', '*')
+            request.setHeader('Access-Control-Allow-Methods', 'GET')
+            request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with,user')
+            request.setHeader('Access-Control-Max-Age', 2520) # 42 hours
             response = json.dumps(data, default=lambda o: o.__dict__)
             request.write(response)
             request.finish()
 
         user = request.getHeader('user')
+        print(user)
 
         data = get_todos(user)
         data.addCallback(onResult)
@@ -45,6 +50,7 @@ class ToDoAPI(APIResource):
 
     @GET('^/todos/(?P<id>[0-9]+)')
     def get_info(self, request, id):
+        print 'get todo'
         def onResult(data):
             request.setHeader(b"content-type", b"application/json")
             response = json.dumps(data, default=lambda o: o.__dict__)
@@ -58,6 +64,7 @@ class ToDoAPI(APIResource):
 
     @POST('^/todos/$')
     def set_info(self, request):
+        print 'post todo'
 
         def onResult(id):
             todo = '{ "status": 0, "task": "'+ requestedTodo.task +'", "id": '+ str(id) + ', "user": "' + user + '" }'
@@ -75,6 +82,7 @@ class ToDoAPI(APIResource):
 
     @PUT('^/todos/(?P<id>[0-9]+)')
     def create_ob(self, request, id):
+        print 'put todo'
         def onResult(data):
             request.setHeader(b"content-type", b"application/json")
             response = json.dumps(data, default=lambda o: o.__dict__)
@@ -92,6 +100,7 @@ class ToDoAPI(APIResource):
 
     @DELETE('^/todos/(?P<id>[0-9]+)')
     def del_ob(self, request, id):
+        print 'delete todo'
         def onResult(data):
             request.setHeader(b"content-type", b"application/json")
             request.write(data)
@@ -103,6 +112,7 @@ class ToDoAPI(APIResource):
 
     @POST('^/login/$')
     def user_login(self, request):
+        print 'post login'
         def onResult(data):
             request.setHeader(b"content-type", b"application/json")
             print data.id
@@ -129,7 +139,15 @@ class ToDoAPI(APIResource):
 
     @ALL('^/')
     def default(self, request):
-        return "Bad request."
+        print "erro de url"
+        request.setHeader(b"content-type", b"application/json")
+        request.setHeader('Access-Control-Allow-Origin', '*')
+        request.setHeader('Access-Control-Allow-Methods', 'GET')
+        request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with,user')
+        request.setHeader('Access-Control-Max-Age', 2520) # 42 hours
+        #request.setResponseCode(404)
+        request.finish()
+        return NOT_DONE_YET
 
 site = Site(ToDoAPI(), timeout=None)
 reactor.listenTCP(8090, site)
