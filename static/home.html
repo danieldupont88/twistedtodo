@@ -9,8 +9,7 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script><!-- load jquery -->
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script><!-- load angular -->
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular-resource.js"></script><!-- load angular -->
-    <script src="todoApp.js"></script>
-    <script src="todoService.js"></script>
+
     <script src="todoCtrl.js"></script>
 
 
@@ -19,37 +18,65 @@
 <body ng-controller="todoCtrl">
     <div class="container">
 
-        <!-- HEADER AND TODO COUNT -->
-        <div class="jumbotron text-center">
-            <h2>I'm a Todo-aholic <span class="label label-info">{{ todos.length }}</span></h2>
-        </div>
+        <div class="row" id="loginContainer">
+            <div class="col-md-3"></div>
+            <div class="col-md-6 alert alert-warning" role="alert">
+                <span class="text-center"><h3>Você não está logado! </h3></span>
 
-        <!-- TODO LIST -->
-        <div id="todo-list" class="row">
-            <div class="col-sm-4 col-sm-offset-4">
+                <div class="input-group col-md-12">
+                    <input type="text" class="form-control" placeholder="usuário" aria-describedby="basic-addon2" ng-model="user">
+                    <input type="password" class="form-control" placeholder="senha" aria-describedby="basic-addon2" ng-model="password">
+                    <button type="button" class="btn btn-default" ng-click="makeLogin()">Login</button>
+                </div>
 
-                <!-- LOOP OVER THE TODOS IN $scope.todos -->
-                <div class="checkbox" ng-repeat="todo in todos">
-                    <label>
-                        <input type="checkbox" ng-click="deleteTodo(todo._id)"> {{ todo.text }}
-                    </label>
+
+                <div class="alert alert-warning alert-dismissible" role="alert" ng-show="loginError">
+                    <button type="button" class="close" ng-click="dismissError()" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <strong>{{loginError}}</strong>
                 </div>
 
             </div>
+            <div class="col-md-3"></div>
+        </div>
+        <div class="row">
+            <div class="text-center" ng-show="loggedUser">
+                <h2>Olá, {{loggedUser}}! </h2>
+                <h3>Você tem {{ todos.length }} tarefas: </h3>
+            </div>
         </div>
 
-        <!-- FORM TO CREATE TODOS -->
-        <div id="todo-form" class="row">
+        <div id="todo-list" class="row" ng-hide="!loggedUser">
+            <div class="col-md-8 col-md-offset-2">
+
+
+
+                <div ng-repeat="todo in todos" class="input-group" id="TodoContainer{{todo.id}}">
+                    <span class="input-group-addon">
+                        <input type="checkbox" ng-click="checkTodo(todo)" ng-checked="{{todo.status==1}}">
+                    </span>
+                    <input type="text" class="form-control" ng-model="todo.task">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" ng-click="updateTodo(todo)" type="button">Editar</button>
+                    </span>
+                    <span class="input-group-btn">
+                        <button class="btn btn-danger" ng-click="deleteTodo(todo)" type="button">Deletar</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row"> <br> </div>
+        <div id="todo-form" class="row" ng-hide="!loggedUser">
             <div class="col-sm-8 col-sm-offset-2 text-center">
                 <form>
                     <div class="form-group">
 
-                        <!-- BIND THIS VALUE TO formData.text IN ANGULAR -->
-                        <input type="text" class="form-control input-lg text-center" placeholder="I want to buy a puppy that will love me forever" ng-model="formData.text">
+
+                        <input type="text" class="form-control input-lg text-center" placeholder="Criar uma nova tarefa..." ng-model="newTodo">
                     </div>
 
-                    <!-- createToDo() WILL CREATE NEW TODOS -->
-                    <button type="submit" class="btn btn-primary btn-lg" ng-click="createTodo()">Add</button>
+
+                    <button type="submit" class="btn btn-primary btn-lg" ng-click="createTodo()">Criar</button>
                 </form>
             </div>
         </div>

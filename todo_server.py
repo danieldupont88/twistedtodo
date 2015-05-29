@@ -34,9 +34,9 @@ class ToDoAPI(APIResource):
         def onResult(data):
             request.setHeader(b"content-type", b"application/json")
             request.setHeader('Access-Control-Allow-Origin', '*')
-            request.setHeader('Access-Control-Allow-Methods', 'GET')
-            request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with,user')
-            request.setHeader('Access-Control-Max-Age', 2520) # 42 hours
+            request.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE')
+            request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with,user,Content-Type')
+            request.setHeader('Access-Control-Max-Age', 2520)
             response = json.dumps(data, default=lambda o: o.__dict__)
             request.write(response)
             request.finish()
@@ -52,6 +52,10 @@ class ToDoAPI(APIResource):
     def get_info(self, request, id):
         print 'get todo'
         def onResult(data):
+            request.setHeader('Access-Control-Allow-Origin', '*')
+            request.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE')
+            request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with,user,Content-Type')
+            request.setHeader('Access-Control-Max-Age', 2520)
             request.setHeader(b"content-type", b"application/json")
             response = json.dumps(data, default=lambda o: o.__dict__)
             request.write(response)
@@ -62,11 +66,15 @@ class ToDoAPI(APIResource):
         data.addCallback(onResult)
         return NOT_DONE_YET
 
-    @POST('^/todos/$')
+    @POST('^/todos$')
     def set_info(self, request):
         print 'post todo'
 
         def onResult(id):
+            request.setHeader('Access-Control-Allow-Origin', '*')
+            request.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE')
+            request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with,user,Content-Type')
+            request.setHeader('Access-Control-Max-Age', 2520)
             todo = '{ "status": 0, "task": "'+ requestedTodo.task +'", "id": '+ str(id) + ', "user": "' + user + '" }'
             request.setHeader(b"content-type", b"application/json")
             request.write(todo.encode("utf-8"))
@@ -84,6 +92,10 @@ class ToDoAPI(APIResource):
     def create_ob(self, request, id):
         print 'put todo'
         def onResult(data):
+            request.setHeader('Access-Control-Allow-Origin', '*')
+            request.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE')
+            request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with,user,Content-Type')
+            request.setHeader('Access-Control-Max-Age', 2520)
             request.setHeader(b"content-type", b"application/json")
             response = json.dumps(data, default=lambda o: o.__dict__)
             request.write(response)
@@ -102,6 +114,10 @@ class ToDoAPI(APIResource):
     def del_ob(self, request, id):
         print 'delete todo'
         def onResult(data):
+            request.setHeader('Access-Control-Allow-Origin', '*')
+            request.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE')
+            request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with,user,Content-Type')
+            request.setHeader('Access-Control-Max-Age', 2520)
             request.setHeader(b"content-type", b"application/json")
             request.write(data)
             request.finish()
@@ -114,9 +130,15 @@ class ToDoAPI(APIResource):
     def user_login(self, request):
         print 'post login'
         def onResult(data):
+            request.setHeader('Access-Control-Allow-Origin', '*')
+            request.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE')
+            request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with,user,Content-Type')
+            request.setHeader('Access-Control-Max-Age', 2520)
             request.setHeader(b"content-type", b"application/json")
             print data.id
-            request.setHeader(b"user", data.id)
+            response = json.dumps(data, default=lambda o: o.__dict__)
+            request.write(response)
+            request.setHeader(b"logged-user", data.id)
             request.finish()
 
         def onError(err):
@@ -125,7 +147,6 @@ class ToDoAPI(APIResource):
 
         payload = cgi.escape(request.content.read())
         requestedLogin = json.loads(payload, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
-        request.setHeader(b"content-type", b"application/json")
 
         print requestedLogin.username
         print requestedLogin.password
@@ -139,11 +160,11 @@ class ToDoAPI(APIResource):
 
     @ALL('^/')
     def default(self, request):
-        print "erro de url"
+        print "CORS HEADERS"
         request.setHeader(b"content-type", b"application/json")
         request.setHeader('Access-Control-Allow-Origin', '*')
-        request.setHeader('Access-Control-Allow-Methods', 'GET')
-        request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with,user')
+        request.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE')
+        request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with,user,Content-Type')
         request.setHeader('Access-Control-Max-Age', 2520) # 42 hours
         #request.setResponseCode(404)
         request.finish()
