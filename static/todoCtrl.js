@@ -118,6 +118,7 @@ angular.module('twistedToDo')
             };
 
             $scope.deleteTodo = function(todo) {
+                console.log(todo);
                 var req = {
                     method: 'DELETE',
                     url: 'http://dn3lenovo\:8090/todos/' + todo.id,
@@ -128,6 +129,8 @@ angular.module('twistedToDo')
                 $http(req).success(
                     function (data, status, headers, config) {
                         $("#TodoContainer" + todo.id).hide("slow");
+                        var index = $scope.todos.indexOf(todo);
+                        $scope.todos.splice(index, 1);
                     })
                     .error(
                     function (data, status, headers, config) {

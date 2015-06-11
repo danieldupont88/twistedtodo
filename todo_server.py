@@ -3,8 +3,9 @@ __author__ = 'dn3'
 import json
 import cgi
 from collections import namedtuple
-from txrestapi.resource import APIResource
+
 from txrestapi.methods import GET, POST, PUT, ALL, DELETE
+from txrestapi.resource import APIResource
 from twisted.internet import reactor, defer
 from twisted.web.server import Site, NOT_DONE_YET
 
